@@ -32,12 +32,11 @@ rocks = np.array([[2700, 2750],  # Vp, rho
 earth = rocks[model]
 
 # Add noise to the model 
-noise_amount = 0.2  # multiplied by the variance, so 1 = the var. 
+noise_amount = 0.1  # multiplied by the variance, so 1 = the var. 
 Vp_noise = random_noise(earth[:,:,0], mode='gaussian', clip=False, seed=11, mean=np.mean(earth[:,:,0]), var=np.var(earth[:,:,0])*noise_amount)
-earth[:,:,0] = np.divide(np.add(earth[:,:,0], earth[:,:,0]+Vp_noise),2)
+earth[:,:,0] = np.divide(np.add(earth[:,:,0], Vp_noise),2)
 rho_noise = random_noise(earth[:,:,1], mode='gaussian', clip=False, seed=11, mean=np.mean(earth[:,:,1]), var=np.var(earth[:,:,1])*noise_amount)
-earth[:,:,1] = np.divide(np.add(earth[:,:,1], earth[:,:,1]+rho_noise),2)
-
+earth[:,:,1] = np.divide(np.add(earth[:,:,1], rho_noise),2)
 
 
 f, (ax1, ax2) = plt.subplots(2, 1, sharex=True)
@@ -82,22 +81,26 @@ plt.show()
 apparent = np.amax(synth, axis=0)
 actual = synth[depth//3, :]
 
+plt.figure(figsize=(10,7))
 plt.plot(apparent, 'r-', label='Apparent amplitude')
 plt.plot(actual, 'y-', label='Actual amplitude')
 plt.ylabel('Amplitude')
 plt.legend()
+plt.savefig('ch2_synthetic_amplitude_curve.jpg', dpi=300)
 plt.show()
 
 apparent_t = np.argmax(synth, axis=0)
 actual_t = np.argmax(rc, axis=0)
 
 # Plot seismic 
+plt.figure(figsize=(10,7))
 plt.imshow(synth, aspect=0.3, cmap='Greys')
 plt.colorbar(shrink=0.925)
 # Plot location of peak amplitude
 plt.plot(apparent_t, 'r-', label='Apparent amplitude')
 plt.plot(actual_t, 'y-', label='Actual amplitude')
 plt.legend()
+plt.savefig('ch2_synthetic_wedge_seismic.jpg', dpi=300)
 plt.show()
 
 # Four axes, returned as a 2-d array
@@ -119,5 +122,5 @@ plt.setp([a.get_xticklabels() for a in axarr[0, :]], visible=False)
 plt.setp([a.get_yticklabels() for a in axarr[:, 1]], visible=False)
 fig = plt.gcf()
 fig.set_size_inches(10, 7)
-plt.savefig('ch2_synthetic_wedge_setup.jpg', dip=300)
+plt.savefig('ch2_synthetic_wedge_setup.jpg', dpi=300)
 plt.show()
