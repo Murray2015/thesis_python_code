@@ -13,8 +13,9 @@ sense.
 import numpy as np
 import matplotlib.pyplot as plt 
 import bruges 
+from skimage.util import random_noise as random_noise
 
-length, depth = 40, 100 
+length, depth = 40, 100
 model = 1  + np.tri(depth, length, k=-depth//3, dtype=int)
 model[0:depth//3,:] = 0
 
@@ -29,6 +30,15 @@ rocks = np.array([[2700, 2750],  # Vp, rho
 # then index into it, where it takes the first, second, or third value in rocks depending
 # on whether the matrix is full of 0, 1 or 2 in the model.                   
 earth = rocks[model]
+
+# Add noise to the model 
+noise_amount = 0.2  # multiplied by the variance, so 1 = the var. 
+Vp_noise = random_noise(earth[:,:,0], mode='gaussian', clip=False, seed=11, mean=np.mean(earth[:,:,0]), var=np.var(earth[:,:,0])*noise_amount)
+earth[:,:,0] = np.divide(np.add(earth[:,:,0], earth[:,:,0]+Vp_noise),2)
+rho_noise = random_noise(earth[:,:,1], mode='gaussian', clip=False, seed=11, mean=np.mean(earth[:,:,1]), var=np.var(earth[:,:,1])*noise_amount)
+earth[:,:,1] = np.divide(np.add(earth[:,:,1], earth[:,:,1]+rho_noise),2)
+
+
 
 f, (ax1, ax2) = plt.subplots(2, 1, sharex=True)
 m1 = ax1.imshow(earth[:,:,0], cmap='viridis')
