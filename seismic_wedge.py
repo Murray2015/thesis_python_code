@@ -15,7 +15,7 @@ import matplotlib.pyplot as plt
 import bruges 
 from skimage.util import random_noise as random_noise
 
-length, depth = 40, 100
+length, depth = 80, 200
 model = 1  + np.tri(depth, length, k=-depth//3, dtype=int)
 model[0:depth//3,:] = 0
 
@@ -32,20 +32,21 @@ rocks = np.array([[2700, 2750],  # Vp, rho
 earth = rocks[model]
 
 # Add noise to the model 
-noise_amount = 0.1  # multiplied by the variance, so 1 = the var. 
+noise_amount = 0.0  # multiplied by the variance, so 1 = the var. 
 Vp_noise = random_noise(earth[:,:,0], mode='gaussian', clip=False, seed=11, mean=np.mean(earth[:,:,0]), var=np.var(earth[:,:,0])*noise_amount)
 earth[:,:,0] = np.divide(np.add(earth[:,:,0], Vp_noise),2)
 rho_noise = random_noise(earth[:,:,1], mode='gaussian', clip=False, seed=11, mean=np.mean(earth[:,:,1]), var=np.var(earth[:,:,1])*noise_amount)
 earth[:,:,1] = np.divide(np.add(earth[:,:,1], rho_noise),2)
 
 
-f, (ax1, ax2) = plt.subplots(2, 1, sharex=True)
-m1 = ax1.imshow(earth[:,:,0], cmap='viridis')
-ax1.set_title(r'$V_p$')
-f.colorbar(m1, ax=ax1)
-m2=ax2.imshow(earth[:,:,1], cmap='plasma')
-ax2.set_title(r'$\rho$')
-f.colorbar(m2, ax=ax2)
+plt.imshow(earth[:,:,0], cmap='viridis', aspect=0.2)
+plt.title(r'$V_p$')
+plt.colorbar(shrink=0.65)
+plt.show()
+
+plt.imshow(earth[:,:,1], cmap='plasma', aspect=0.2)
+plt.title(r'$\rho$')
+plt.colorbar(shrink=0.65)
 plt.show()
 
 imp = np.apply_along_axis(np.product, -1, earth)
@@ -71,33 +72,39 @@ synth = np.apply_along_axis(lambda t: np.convolve(t, w, mode='same'),
                             axis=0,
                             arr=rc)
 
-plt.imshow(synth, cmap="Greys", aspect=0.2)
+plt.imshow(synth, cmap="seismic", aspect=0.2)
 plt.show()
 
 # We can exploit the fact taht the reflections have the largest and smallest
 # values at the top and bottom of the wedge, to find the amplitudes of the reflections
 # at the peak. 
 # Find the max of the columns (corresponding to the reflection at the top of the sill)
-apparent = np.amax(synth, axis=0)
+apparent = np.amax(synth[50:75,:], axis=0)
 actual = synth[depth//3, :]
+background = np.average(np.absolute(synth[0:9,:]), axis=0)
+
 
 plt.figure(figsize=(10,7))
-plt.plot(apparent, 'r-', label='Apparent amplitude')
+plt.plot(apparent, 'g-', label='Apparent amplitude')
 plt.plot(actual, 'y-', label='Actual amplitude')
+plt.plot(background, 'b-', label='Background average amplitude')
 plt.ylabel('Amplitude')
+plt.ylim(0,0.4)
+plt.xlim(0,80)
 plt.legend()
 plt.savefig('ch2_synthetic_amplitude_curve.jpg', dpi=300)
 plt.show()
 
-apparent_t = np.argmax(synth, axis=0)
-actual_t = np.argmax(rc, axis=0)
+apparent_t = np.argmax(synth[50:75,:], axis=0) + 50
+#actual_t = np.argmax(rc[50:75,:], axis=0) + 50 # this is correct for complex, but simplter method below
+actual_t = np.repeat(depth//3, length)
 
 # Plot seismic 
 plt.figure(figsize=(10,7))
-plt.imshow(synth, aspect=0.3, cmap='Greys')
+plt.imshow(synth, aspect=0.3, cmap='seismic')
 plt.colorbar(shrink=0.925)
 # Plot location of peak amplitude
-plt.plot(apparent_t, 'r-', label='Apparent amplitude')
+plt.plot(apparent_t, 'g-', label='Apparent amplitude')
 plt.plot(actual_t, 'y-', label='Actual amplitude')
 plt.legend()
 plt.savefig('ch2_synthetic_wedge_seismic.jpg', dpi=300)
@@ -117,7 +124,7 @@ axarr[1, 0].set_title('Acoustic imp.')
 m4 = axarr[1, 1].imshow(rc, cmap='Greys', aspect=0.3)
 f.colorbar(m4, ax=axarr[1, 1])
 axarr[1, 1].set_title('Reflection coeff.')
-# Fine-tune figure; hide x ticks for top plots and y ticks for right plots
+## Fine-tune figure; hide x ticks for top plots and y ticks for right plots
 plt.setp([a.get_xticklabels() for a in axarr[0, :]], visible=False)
 plt.setp([a.get_yticklabels() for a in axarr[:, 1]], visible=False)
 fig = plt.gcf()
