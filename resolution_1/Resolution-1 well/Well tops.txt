@@ -1,0 +1,11 @@
+Well	Formation	Depth (m)
+Resolution-1	Hawera-Wanganui	75
+Resolution-1	Taranaki	685
+Resolution-1	Southland	1220
+Resolution-1	Pareora	1280
+Resolution-1	Landon 	1306
+Resolution-1	Arnold	1328
+Resolution-1	Dannevirke	1413.5
+Resolution-1	Mata	1480.5
+Resolution-1	Igneous Intrusive	1911.5
+Resolution-1	TD	1963
