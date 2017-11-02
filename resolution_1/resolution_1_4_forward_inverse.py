@@ -238,11 +238,8 @@ plt.fill_between(greatest_sill_amp_from_time['trace'], least_sill_amp_from_time[
 plt.ylabel("Sill thickness / Fold amplitude (meters)")
 plt.xlabel("Trace")
 plt.legend(loc=8)
+plt.savefig("/home/murray/Documents/thesis_python_code/Resolution_forward_model.pdf",bbox_inches='tight')
 plt.show()
-
-
-
-## Notes - 1. not sure I need ANY of the log stuff at the start of the script?!  
 
 
 
@@ -255,14 +252,13 @@ greatest_sill_vel = 7000
 least_sill_vel = 4500
 greatest_phi0 =0.7
 least_phi0=0.25
-phi0_decimation = 0.02
+phi0_decimation = 0.05
 greatest_lambda = 3.7
 least_lambda = 1.4
-lambda_decimation = 0.05
+lambda_decimation = 0.1
 phi0_vec = np.arange(start=least_phi0, stop=greatest_phi0, step=phi0_decimation)
 lambda_vec = np.arange(start=least_lambda, stop=greatest_lambda, step=lambda_decimation)
 grid_search = np.zeros((len(phi0_vec), len(lambda_vec)))
-grid_search2 = np.zeros((len(phi0_vec), len(lambda_vec)))
 
 
 ## Misfit function 
@@ -277,7 +273,7 @@ def misfit(sill, forced_fold):
             total_misfit += (sill['sill_amp_meters'][i]/1000.0) - forced_fold['decompacted_profile_detrended_km'].loc[forced_fold['trace']==sill['trace'][i]].values
     return total_misfit
     
-misfit(sill_amp_from_time, fold_detrended)
+#misfit(sill_amp_from_time, fold_detrended)
 
 ## Grid search
 ## Outer loop - phi0
@@ -289,34 +285,41 @@ for i_loc, i in enumerate(phi0_vec):
         fold_gs = detrend_fold_profiles(decompact_fold(top_forced_fold_clip, tolerance=0.0001, phi0=i, Lambda=j))
         grid_search[i_loc,j_loc] = misfit(sill_amp_gs, fold_gs) ## fill this with the misfit function. 
         print('i = ', i_loc, ', j = ', j_loc, ', total = ', j_loc+(len(lambda_vec)*i_loc), 'out of ', len(phi0_vec)*len(lambda_vec))
-        grid_search2[i_loc,j_loc] = i_loc ## fill this with the misfit function. 
 
 
+
+## Plot the grid searc
 g2 = abs(grid_search)
 max_loc = np.where(g2 == g2.min())
 opt_phi0 = phi0_vec[::-1][max_loc[0]]
 opt_lambda = lambda_vec[max_loc[1]]
-plt.figure(figsize=(10,4))
+plt.figure()
 plt.imshow(g2, aspect='equal', cmap='jet_r', extent=[least_lambda, greatest_lambda, least_phi0, greatest_phi0])
-plt.scatter(y=[opt_phi0], x=[opt_lambda], c='r', s=40)
-#plt.colorbar(cmap='jet_r')
+#plt.scatter(y=[opt_phi0], x=[opt_lambda], c='r', s=40)
+plt.colorbar(cmap='jet_r')
 plt.ylabel(r'$\Phi_0$')
 plt.xlabel(r'$\lambda$')
+plt.savefig("/home/murray/Documents/thesis_python_code/Resolution_inverse_grid.pdf",bbox_inches='tight')
 plt.show()
 
 ## Next to do - change code so the white padding at the base of the image goes. 
 # add contours
 # replot with more squares 
 # find why lambda axes doesn't go to lambda max (def a bug somewhere)
-# then plot fold profile with min misfit 
 
-# lambda = 3.7 to 1.4
 ## Plot fold profile with minimum misfit 
+fold_decompacted = decompact_fold(top_forced_fold_clip, tolerance=0.0001, phi0=opt_phi0, Lambda=opt_lambda)
+southland_decompacted = decompact_fold(southland_clip, tolerance=0.0001, phi0=opt_phi0, Lambda=opt_lambda)
 
-## Plot the grid search 
+fold_detrended = detrend_fold_profiles(fold_decompacted)
+southland_detrended = detrend_fold_profiles(southland_decompacted)
 
+plt.plot(fold_detrended['trace'], fold_detrended['decompacted_profile_detrended_km']*1000, label='Decompacted fold')
+plt.plot(southland_detrended['trace'], southland_detrended['decompacted_profile_detrended_km']*1000, label='Decompacted Southland')
+plt.fill_between(greatest_sill_amp_from_time['trace'], least_sill_amp_from_time['sill_amp_meters'], greatest_sill_amp_from_time['sill_amp_meters'], color='r', alpha=0.2, label='Sill thickness')
+plt.ylabel("Sill thickness / Fold amplitude (meters)")
+plt.xlabel("Trace")
+plt.legend(loc=8)
+plt.savefig("/home/murray/Documents/thesis_python_code/Resolution_inverse_model.pdf",bbox_inches='tight')
+plt.show()
 
-
-
-### Overall notes: 1. 2 horizons for base sill, one carefully picked (base sill 2 in older scripts) and one
-### less carefully picked. Base sill 1 has been removed from this script. 
