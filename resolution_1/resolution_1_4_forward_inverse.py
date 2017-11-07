@@ -8,7 +8,6 @@ Created on Fri Oct 27 15:01:31 2017
 ## Import dependencies 
 import pandas as pd 
 import matplotlib.pyplot as plt
-import matplotlib.patches as patches
 import numpy as np
 
 
@@ -161,6 +160,7 @@ plt.plot(sill_amp_from_time['trace'], sill_amp_from_time['sill_amp_meters']/1000
 plt.legend()
 plt.show()
 
+
 ##################################
 ######### Forward model ##########
 ##################################
@@ -260,7 +260,7 @@ for i_loc, i in enumerate(phi0_vec):
 
 ## Find the optimum values 
 #g2 = abs(grid_search)
-g2 = grid_search
+#g2 = grid_search
 max_loc = np.where(g2 == g2.min())
 opt_phi0 = phi0_vec[::-1][max_loc[0]]
 opt_lambda = lambda_vec[max_loc[1]]
@@ -295,7 +295,7 @@ plt.fill_between(greatest_sill_amp_from_time['trace'], least_sill_amp_from_time[
 plt.ylabel("Sill thickness / Fold amplitude (meters)")
 plt.xlabel("Trace")
 plt.legend(loc=8)
-plt.savefig("/home/murray/Documents/thesis_python_code/Resolution_optimum_inverse_model.pdf",bbox_inches='tight')
+#plt.savefig("/home/murray/Documents/thesis_python_code/Resolution_optimum_inverse_model.pdf",bbox_inches='tight')
 plt.show()
 
 ### Finally, make a theoretical porosity curve from the above results, fit to the 
@@ -365,19 +365,7 @@ def RHG_misfit(log_poro, theoretical_poro, range_of_interest=(2145, 12100)):
     misfit_vec = np.power((log_poro[range_of_interest[0]:range_of_interest[1]] - theoretical_poro[range_of_interest[0]:range_of_interest[1]]), 2)
     return np.sqrt(np.divide(np.sum(misfit_vec), len(misfit_vec)))
 #RHG_misfit(rhg, theoretical_poro)
-    
-## Plot test curves of theoretical poro and cal poro, to check everything
-rhg = RHG(log_data, 55)
-plt.figure(figsize=(4,6))
-plt.plot(theoretical_poro, log_depths, label='Theoretical poro')
-plt.plot(rhg, log_depths, label='Calc poro')
-plt.plot(rhg[2145:12100], log_depths[2145:12100], label='Fitted region')
-plt.legend()
-plt.xlabel(r"$\phi$")
-plt.ylabel('Depth, km')
-plt.gca().invert_yaxis()
-plt.xlim(0,0.6)
-plt.show()
+
 
 ## Define range of matrix velocities 
 matrix_vels = np.arange(start=40, stop=80, step=1)
@@ -389,12 +377,40 @@ misfits = np.zeros(len(matrix_vels))
 for i_loc, i in enumerate(matrix_vels):
     misfits[i_loc] = RHG_misfit(RHG(log_data, i), theoretical_poro, range_of_interest=(0, 12100))
 
+best_matrix_vel = matrix_vels[np.argmin(misfits)]
 plt.plot(matrix_vels, abs(misfits))
-plt.axvline(x=matrix_vels[np.argmin(misfits)], c='r')
+plt.axvline(x=best_matrix_vel, c='r')
 plt.text(54, 0.1, r'$Minimum = 52 \mu s / ft $', color='r')
 plt.ylabel("RMSE misfit")
 plt.xlabel(r"$Matrix \ velocity \ (\mu s / ft)$")
+plt.savefig("/home/murray/Documents/thesis_python_code/Resolution_inverse_matrix_misfit.pdf",bbox_inches='tight')
+plt.show()
+
+## Plot test curves of theoretical poro and cal poro, to check everything
+rhg = RHG(log_data, best_matrix_vel)
+plt.figure(figsize=(4,6))
+plt.plot(theoretical_poro, log_depths, label='Theoretical porosity')
+plt.plot(rhg, log_depths, label='Calculated porosity')
+plt.plot(rhg[2145:12100], log_depths[2145:12100], label='Fitted region')
+plt.legend()
+plt.xlabel(r"$\phi$")
+plt.ylabel('Depth, km')
+plt.gca().invert_yaxis()
+plt.xlim(0,0.6)
+plt.savefig("/home/murray/Documents/thesis_python_code/Resolution_inverse_log.pdf",bbox_inches='tight')
 plt.show()
 
 
-# Plot curve of misfit vs matrix sonic velocity, and add static ranges for sensible velcities 
+
+
+###### START Sandbox ###### - Question being checked: is there need for this? what difference is there? Answer: lots! ~100m vs ~175 is almost double! 
+temp = southland_clip.copy()
+temp['decompacted_profile_km'] = temp['depth']
+temp2 = detrend_fold_profiles(temp)
+sill_amp_from_time = time_sill_amp_extraction_2d(top_sill_time, base_sill_time, sill_vel=6500)
+
+plt.plot(temp2['trace'], temp2['decompacted_profile_detrended_km'], label='southland')
+plt.plot(sill_amp_from_time['trace'], sill_amp_from_time['sill_amp_meters'], label='sill thickness')
+plt.legend()
+plt.show()
+###### END Sandbox ######
