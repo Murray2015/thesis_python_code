@@ -49,7 +49,7 @@ plt.xlabel("Depth (m)")
 ax5.axvline(x=1900, color='red')
 ax5.axvline(x=1220, color='blue')
 fig.subplots_adjust(wspace=0, hspace=0)
-plt.savefig("/home/murray/Documents/thesis_python_code/Resolution-1_well_plot.pdf")
+#plt.savefig("/home/murray/Documents/thesis_python_code/Resolution-1_well_plot.pdf")
 plt.show()
 
 ## Fill log data with dummy values for water and sed. Create a dataframe of the filled values, 
@@ -70,6 +70,8 @@ SP= np.repeat(np.nan,len(depths))
 temp_dataframe = pd.DataFrame({'DEPTH':depths, 'BS':BS, 'CALI':CALI, 'DTC':DTC, 'GR':GR, 'GR_CORR':GR_CORR, 'RESD':RESD, 'RESS':RESS, 'SP':SP})
 log_data = pd.concat((temp_dataframe,log_data), ignore_index=True)
 
+# Add the water column 
+
 # Interpolate missing values to enable the cumulative integration 
 log_data.loc[0,'DT_s_per_m'] = (1.0/1500)
 log_data['DT_s_per_m'] = log_data['DT_s_per_m'].interpolate()
@@ -89,7 +91,7 @@ plt.gca().invert_yaxis()
 plt.xticks(np.arange(1500, 6000, 1000))
 plt.xlabel(r'$Vp \quad ms^{-1}$', fontsize=18)
 plt.ylabel("Depth (m)", fontsize=14)
-plt.savefig("/home/mxh909/Desktop/magee_resolution_images/Resolution-1_Vp_plot.pdf",bbox_inches='tight')
+#plt.savefig("/home/mxh909/Desktop/magee_resolution_images/Resolution-1_Vp_plot.pdf",bbox_inches='tight')
 plt.show()
 
 
@@ -99,14 +101,16 @@ log_data['DT_s_per_m'] = (log_data['DTC'] * (1e-6) * (1 / 0.3048))
 # Cumulativly integrate to form the time depth curve
 from scipy.integrate import cumtrapz 
 time_s = 2*(cumtrapz(y=log_data['DT_s_per_m'], x=log_data['DEPTH'])) # x2 as log is in one-way-time
-time_s += 0.1 # add in the value of the seafloor from the seismic. Entered here rather than calculated, as well is a little upslope.
+#time_s += 0.1 # add in the value of the seafloor from the seismic. Entered here rather than calculated, as well is a little upslope.
 plt.figure()
 plt.plot(time_s, log_data['DEPTH'][:-1])
-plt.gca().invert_yaxis()
 plt.title("Time-depth curve")
 plt.xlabel("Time (s)")
 plt.ylabel("Depth (m)")
-plt.savefig("/home/mxh909/Desktop/magee_resolution_images/Resolution-TD_curve.pdf",bbox_inches='tight')
+plt.xlim(0,1.8)
+plt.ylim(0,2100)
+plt.gca().invert_yaxis()
+plt.savefig("/home/murray/Documents/thesis_python_code/resolution_1/Resolution-TD_curve.pdf",bbox_inches='tight')
 plt.show()
 
 np.savetxt("/home/mxh909/Desktop/magee_resolution_images/Resolution_1_time_depth_curve.txt", np.vstack((log_data['DEPTH'].values[:-1], time_s)).T, header="Depth_m Time_s")
