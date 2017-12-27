@@ -16,7 +16,7 @@ log_data = pd.read_csv("Wireline/resolution-1_final.las", delim_whitespace=True,
 
 fig = plt.figure(figsize=(8,4))
 fig.set_figheight(12)
-fig.set_figwidth(10)
+fig.set_figwidth(18)
 ax1 = fig.add_subplot(511)
 ax1.set_ylabel('Calliper')
 log_data.plot('DEPTH', 'CALI', ax=ax1, color='red', sharex=True,subplots=True, legend=False)
