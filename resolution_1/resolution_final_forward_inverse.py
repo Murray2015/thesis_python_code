@@ -102,7 +102,7 @@ def decompact_fold(fold, z3=0, tolerance=0.000001, phi0=0.6, Lambda=2):
     return fold 
 
 southland_decompacted = decompact_fold(southland_clip, tolerance=0.0001, phi0=0.3, Lambda=2)
-plt.plot(southland_decompacted['trace'], southland_decompacted['decompacted_profile_km'], label='southland')
+plt.plot(southland_decompacted['trace'], southland_decompacted['decompacted_profile_km'], label='Forced fold')
 plt.plot(sill_amp_from_time['trace'], sill_amp_from_time['sill_amp_meters']/1000, label='sill thickness')
 plt.legend()
 plt.show()
@@ -136,7 +136,7 @@ def detrend_fold_profiles(fold):
     return fold2
 
 southland_detrended = detrend_fold_profiles(southland_decompacted)
-plt.plot(southland_detrended['trace'], southland_detrended['decompacted_profile_detrended_km'], label='decompacted southland')
+plt.plot(southland_detrended['trace'], southland_detrended['decompacted_profile_detrended_km'], label='Decompacted forced fold')
 plt.plot(sill_amp_from_time['trace'], sill_amp_from_time['sill_amp_meters']/1000, label='sill thickness')
 plt.legend()
 plt.show()
@@ -165,12 +165,12 @@ greatest_sill_amp_from_time = time_sill_amp_extraction_2d(top_sill_time, base_si
 ## Make lower limit of sill thickness 
 least_sill_amp_from_time = time_sill_amp_extraction_2d(top_sill_time, base_sill_time, sill_vel=least_sill_vel)
 ## Plot 
-plt.fill_between(greatest_southland_detrended['trace'], least_southland_detrended['decompacted_profile_detrended_km']*1000, greatest_southland_detrended['decompacted_profile_detrended_km']*1000, color='g', alpha=0.2, label='Decompacted Southland')
+plt.fill_between(greatest_southland_detrended['trace'], least_southland_detrended['decompacted_profile_detrended_km']*1000, greatest_southland_detrended['decompacted_profile_detrended_km']*1000, color='g', alpha=0.2, label='Decompacted forced fold')
 plt.fill_between(greatest_sill_amp_from_time['trace'], least_sill_amp_from_time['sill_amp_meters'], greatest_sill_amp_from_time['sill_amp_meters'], color='r', alpha=0.2, label='Sill thickness')
 plt.ylabel("Sill thickness / Fold amplitude (meters)")
 plt.xlabel("Trace")
 plt.legend(loc=8)
-#plt.savefig("/home/murray/Documents/thesis_python_code/Resolution_forward_model.pdf",bbox_inches='tight')
+plt.savefig("/home/murray/Documents/thesis_python_code/Resolution_forward_model.pdf",bbox_inches='tight')
 plt.show()
 
 
@@ -234,18 +234,18 @@ cbar.ax.set_ylabel('RMS Misfit')
 plt.scatter(opt_lambda, opt_phi0, marker='o', s=100, c='k')
 plt.ylabel(r'$\Phi_0$')
 plt.xlabel(r'$\lambda$')
-#plt.savefig("/home/murray/Documents/thesis_python_code/Resolution_inverse_grid.pdf",bbox_inches='tight')
+plt.savefig("/home/murray/Documents/thesis_python_code/Resolution_inverse_grid.pdf",bbox_inches='tight')
 plt.show()
 
 ## Plot fold profile with minimum misfit 
 southland_decompacted = decompact_fold(southland_clip, tolerance=0.0001, phi0=opt_phi0, Lambda=opt_lambda)
 southland_detrended = detrend_fold_profiles(southland_decompacted)
-plt.plot(southland_detrended['trace'], southland_detrended['decompacted_profile_detrended_km']*1000, label='Decompacted Southland')
+plt.plot(southland_detrended['trace'], southland_detrended['decompacted_profile_detrended_km']*1000, label='Decompacted forced fold')
 plt.fill_between(greatest_sill_amp_from_time['trace'], least_sill_amp_from_time['sill_amp_meters'], greatest_sill_amp_from_time['sill_amp_meters'], color='r', alpha=0.2, label='Sill thickness')
 plt.ylabel("Sill thickness / Fold amplitude (meters)")
 plt.xlabel("Trace")
 plt.legend(loc=8)
-#plt.savefig("/home/murray/Documents/thesis_python_code/Resolution_optimum_inverse_model.pdf",bbox_inches='tight')
+plt.savefig("/home/murray/Documents/thesis_python_code/Resolution_optimum_inverse_model.pdf",bbox_inches='tight')
 plt.show()
 
 
@@ -327,7 +327,7 @@ plt.axvline(x=best_matrix_vel, c='r')
 plt.text(best_matrix_vel+2.5, 0.12, r'$Minimum = %s \mu s / ft $' % (best_matrix_vel), color='r')
 plt.ylabel("RMSE misfit")
 plt.xlabel(r"$Matrix \ velocity \ (\mu s / ft)$")
-#plt.savefig("/home/murray/Documents/thesis_python_code/Resolution_inverse_matrix_misfit.pdf",bbox_inches='tight')
+plt.savefig("/home/murray/Documents/thesis_python_code/Resolution_inverse_matrix_misfit.pdf",bbox_inches='tight')
 plt.show()
 
 ## Plot test curves of theoretical poro and cal poro, to check everything
@@ -341,5 +341,5 @@ plt.xlabel(r"$\phi$")
 plt.ylabel('Depth, km')
 plt.gca().invert_yaxis()
 plt.xlim(0,0.6)
-#plt.savefig("/home/murray/Documents/thesis_python_code/Resolution_inverse_log.pdf",bbox_inches='tight')
+plt.savefig("/home/murray/Documents/thesis_python_code/Resolution_inverse_log.pdf",bbox_inches='tight')
 plt.show()
